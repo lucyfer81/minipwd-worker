@@ -4,10 +4,11 @@ compatibility_date = "2024-01-01"
 workers_dev = true
 
 # D1 数据库绑定
+# 注意：需要在 Cloudflare 创建自己的 D1 数据库，并填入对应的 database_id
 [[d1_databases]]
 binding = "DB"
 database_name = "minipwd-db"
-database_id = "d07acb29-da25-48cb-b5c9-2179ebab5f71"
+# database_id = "your-database-id-here"  # 替换为你的实际数据库 ID
 
 # 静态资源绑定
 [assets]
