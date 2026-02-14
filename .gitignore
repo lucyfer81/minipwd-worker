@@ -17,3 +17,6 @@ migrate.py
 
 # 开发计划和设计文档
 docs/plans/
+
+# Cloudflare Workers 配置（包含敏感的 database_id）
+wrangler.toml
