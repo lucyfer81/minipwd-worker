@@ -3,6 +3,7 @@ const API_BASE = window.location.origin;
 let authToken = null;
 let passwordItems = [];
 let currentEditorMode = 'add'; // 'add' or 'edit'
+let currentDetailItem = null;
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
@@ -43,6 +44,17 @@ function setupEventListeners() {
     copyToClipboard(password);
     showToast('复制成功', 'success');
   });
+
+  // 详情弹窗
+  document.getElementById('closeDetailBtn').addEventListener('click', closeItemDetail);
+  document.getElementById('detailModal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) {
+      closeItemDetail();
+    }
+  });
+  document.getElementById('copyDetailUsernameBtn').addEventListener('click', () => copyDetailField('username'));
+  document.getElementById('copyDetailPasswordBtn').addEventListener('click', () => copyDetailField('password'));
+  document.getElementById('copyDetailUrlBtn').addEventListener('click', () => copyDetailField('url'));
 
   // 编辑器弹窗
   document.getElementById('closeEditorBtn').addEventListener('click', closeEditor);
@@ -123,7 +135,7 @@ function renderItems(items) {
     div.className = 'password-item bg-white rounded-lg shadow p-4';
     div.innerHTML = `
       <div class="flex justify-between items-start">
-        <div class="flex-1 cursor-pointer" onclick="copyPassword('${item.password}')">
+        <div class="flex-1 cursor-pointer" onclick="openItemDetail(${item.id})">
           <div class="flex items-center gap-2">
             <h3 class="font-bold text-lg">${escapeHtml(item.title)}</h3>
             ${item.login_url ? `<a href="${escapeHtml(item.login_url)}" target="_blank" class="text-blue-600 hover:underline" onclick="event.stopPropagation()">🔐</a>` : ''}
@@ -139,6 +151,58 @@ function renderItems(items) {
     `;
     list.appendChild(div);
   });
+}
+
+// 打开详情弹窗
+function openItemDetail(id) {
+  const item = passwordItems.find(i => i.id === id);
+  if (!item) return;
+
+  currentDetailItem = item;
+  document.getElementById('detailTitle').textContent = item.title || '条目详情';
+  document.getElementById('detailUsername').textContent = item.username || '-';
+  document.getElementById('detailPassword').textContent = item.password || '-';
+  document.getElementById('detailUrl').textContent = item.login_url || '-';
+
+  const notesGroup = document.getElementById('detailNotesGroup');
+  if (item.notes) {
+    document.getElementById('detailNotes').textContent = item.notes;
+    notesGroup.classList.remove('hidden');
+  } else {
+    document.getElementById('detailNotes').textContent = '';
+    notesGroup.classList.add('hidden');
+  }
+
+  document.getElementById('detailModal').classList.remove('hidden');
+}
+
+function closeItemDetail() {
+  document.getElementById('detailModal').classList.add('hidden');
+  currentDetailItem = null;
+}
+
+function copyDetailField(field) {
+  if (!currentDetailItem) return;
+
+  const fieldTextMap = {
+    username: currentDetailItem.username,
+    password: currentDetailItem.password,
+    url: currentDetailItem.login_url,
+  };
+  const fieldNameMap = {
+    username: '用户名',
+    password: '密码',
+    url: 'URL',
+  };
+
+  const text = fieldTextMap[field];
+  if (!text) {
+    showToast('暂无可复制内容', 'error');
+    return;
+  }
+
+  copyToClipboard(text);
+  showToast(`${fieldNameMap[field]}已复制`, 'success');
 }
 
 // 搜索处理
@@ -311,12 +375,6 @@ async function deleteItem(id) {
   } catch (error) {
     showToast('网络错误', 'error');
   }
-}
-
-// 复制密码
-function copyPassword(password) {
-  copyToClipboard(password);
-  showToast('密码已复制', 'success');
 }
 
 // 复制到剪贴板
