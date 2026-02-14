@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MiniPwd - 密码管理器</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <!-- 登录覆盖层 -->
+  <div id="loginOverlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4">
+      <div class="text-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">🔐 MiniPwd</h1>
+        <p class="text-gray-600 mt-2">请输入主密码解锁</p>
+      </div>
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <input type="password" id="masterPassword" required
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="主密码">
+        </div>
+        <button type="submit"
+          class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+          解锁
+        </button>
+      </form>
+      <p id="loginError" class="text-red-500 text-center mt-4 hidden">密码错误，请重试</p>
+    </div>
+  </div>
+
+  <!-- 主应用 -->
+  <div id="app" class="container mx-auto px-4 py-8 max-w-4xl hidden">
+    <header class="mb-6">
+      <h1 class="text-3xl font-bold text-gray-800">🔐 MiniPwd</h1>
+    </header>
+
+    <!-- 工具栏 -->
+    <div class="bg-white rounded-lg shadow p-4 mb-6 flex flex-wrap gap-4 items-center">
+      <button id="addBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+        + 添加
+      </button>
+      <button id="generateBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+        🔑 生成密码
+      </button>
+      <div class="flex-1 min-w-64">
+        <input type="text" id="searchInput" placeholder="🔍 搜索..."
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+      </div>
+    </div>
+
+    <!-- 密码列表 -->
+    <div id="passwordList" class="space-y-4">
+      <!-- 动态生成 -->
+    </div>
+  </div>
+
+  <!-- 密码生成器弹窗 -->
+  <div id="generatorModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] hidden">
+    <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold">🔑 密码生成器</h2>
+        <button id="closeGeneratorBtn" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            密码长度: <span id="lengthValue">16</span>
+          </label>
+          <input type="range" id="lengthSlider" min="8" max="32" value="16"
+            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+        </div>
+
+        <div class="space-y-2">
+          <label class="flex items-center">
+            <input type="checkbox" id="useUppercase" checked class="mr-2">
+            <span>大写字母 (A-Z)</span>
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" id="useLowercase" checked class="mr-2">
+            <span>小写字母 (a-z)</span>
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" id="useNumbers" checked class="mr-2">
+            <span>数字 (0-9)</span>
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" id="useSymbols" checked class="mr-2">
+            <span>特殊字符 (!@#$...)</span>
+          </label>
+          <label class="flex items-center">
+            <input type="checkbox" id="excludeSimilar" checked class="mr-2">
+            <span>排除相似字符 (0OIl)</span>
+          </label>
+        </div>
+
+        <button id="generateActionBtn" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">
+          生成密码
+        </button>
+
+        <div id="generatedPassword" class="hidden">
+          <div class="bg-gray-100 rounded-lg p-4 flex items-center justify-between">
+            <code id="passwordResult" class="text-lg font-mono flex-1 break-all"></code>
+            <button id="copyPasswordBtn" class="ml-2 text-blue-600 hover:text-blue-800">
+              📋 复制
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 添加/编辑弹窗 -->
+  <div id="editorModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+      <div class="flex justify-between items-center mb-4">
+        <h2 id="editorTitle" class="text-xl font-bold">添加密码条目</h2>
+        <button id="closeEditorBtn" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+      </div>
+
+      <form id="editorForm" class="space-y-4">
+        <input type="hidden" id="itemId">
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">平台/应用名称 *</label>
+          <input type="text" id="itemTitle" required
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">账号/用户名 *</label>
+          <input type="text" id="itemUsername" required
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">密码 *</label>
+          <div class="flex gap-2">
+            <div class="relative flex-1">
+              <input type="password" id="itemPassword" required
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 pr-10">
+              <button type="button" id="togglePasswordBtn" class="absolute right-2 top-1/2 -translate-y-1/2">
+                👁️
+              </button>
+            </div>
+            <button type="button" id="generateForItemBtn" class="bg-gray-200 px-3 py-2 rounded-lg hover:bg-gray-300">
+              🔄
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">登录 URL</label>
+          <input type="url" id="itemLoginUrl"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">备注</label>
+          <textarea id="itemNotes" rows="3"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+
+        <div class="flex gap-4">
+          <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">
+            保存
+          </button>
+          <button type="button" id="cancelEditorBtn" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400">
+            取消
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

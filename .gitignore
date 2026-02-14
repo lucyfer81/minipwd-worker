@@ -1,0 +1,19 @@
+node_modules/
+.wrangler/
+dist/
+*.log
+.env
+.env.local
+.DS_Store
+*.local
+
+# Claude 配置文件
+CLAUDE.md
+
+# 迁移脚本（仅开发使用）
+generate-import-sql.js
+import.js
+migrate.py
+
+# 开发计划和设计文档
+docs/plans/
