@@ -7,7 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="/styles.css">
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="min-h-screen app-body">
   <!-- 登录覆盖层 -->
   <div id="loginOverlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4">
@@ -31,27 +31,27 @@
   </div>
 
   <!-- 主应用 -->
-  <div id="app" class="container mx-auto px-4 py-8 max-w-4xl hidden">
-    <header class="mb-6">
+  <div id="app" class="app-shell hidden">
+    <header class="app-header mb-6">
       <h1 class="text-3xl font-bold text-gray-800">🔐 MiniPwd</h1>
     </header>
 
     <!-- 工具栏 -->
-    <div class="bg-white rounded-lg shadow p-4 mb-6 flex flex-wrap gap-4 items-center">
+    <div class="toolbar bg-white rounded-lg shadow p-4 mb-6 flex flex-wrap gap-4 items-center">
       <button id="addBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
         + 添加
       </button>
       <button id="generateBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
         🔑 生成密码
       </button>
-      <div class="flex-1 min-w-64">
+      <div class="toolbar-search flex-1 min-w-64">
         <input type="text" id="searchInput" placeholder="🔍 搜索..."
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
       </div>
     </div>
 
     <!-- 密码列表 -->
-    <div id="passwordList" class="space-y-4">
+    <div id="passwordList" class="cards-grid">
       <!-- 动态生成 -->
     </div>
   </div>

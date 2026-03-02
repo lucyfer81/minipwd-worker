@@ -1,19 +1,170 @@
-/* Custom styles */
+/* Layout + card system */
+:root {
+  --shell-max-width: 2560px;
+  --page-gutter: 12px;
+  --grid-gap: 16px;
+}
+
 body {
+  margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
-.password-item {
+.app-body {
+  background: linear-gradient(180deg, #f8fafc 0%, #f3f4f6 100%);
+}
+
+.app-shell {
+  width: min(calc(100vw - (var(--page-gutter) * 2)), var(--shell-max-width));
+  margin: 0 auto;
+  padding: clamp(16px, 1.8vw, 32px) 0 32px;
+}
+
+.app-header h1 {
+  margin: 0;
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: auto auto minmax(240px, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.toolbar-search {
+  min-width: 0;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--grid-gap);
+  align-items: stretch;
+}
+
+.password-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 16px;
+  min-height: 164px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.password-item:hover {
+.password-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.password-card-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.password-card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.password-card-title {
+  margin: 0;
+  font-size: 1.06rem;
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.password-card-meta {
+  margin: 0;
+  color: #4b5563;
+  overflow-wrap: anywhere;
+}
+
+.password-card-notes {
+  margin: 6px 0 0;
+  color: #6b7280;
+  font-size: 0.92rem;
+  line-height: 1.35;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.password-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.password-card-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.cards-empty {
+  grid-column: 1 / -1;
 }
 
 .toast {
   animation: slideIn 0.3s ease-out;
+}
+
+@media (max-width: 767px) {
+  .toolbar {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .toolbar-search {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --page-gutter: 18px;
+    --grid-gap: 18px;
+  }
+
+  .cards-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .cards-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --page-gutter: 24px;
+    --grid-gap: 20px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .cards-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1920px) {
+  :root {
+    --page-gutter: 32px;
+  }
+}
+
+@media (min-width: 2200px) {
+  .cards-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
 }
 
 @keyframes slideIn {

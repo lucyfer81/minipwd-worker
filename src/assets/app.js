@@ -126,27 +126,29 @@ function renderItems(items) {
   list.innerHTML = '';
 
   if (items.length === 0) {
-    list.innerHTML = '<div class="text-center text-gray-500 py-8">暂无密码条目，点击"添加"开始</div>';
+    list.innerHTML = `
+      <div class="cards-empty text-center text-gray-500 py-10 bg-white rounded-lg border border-dashed border-gray-300">
+        暂无密码条目，点击"添加"开始
+      </div>
+    `;
     return;
   }
 
   items.forEach(item => {
     const div = document.createElement('div');
-    div.className = 'password-item bg-white rounded-lg shadow p-4';
+    div.className = 'password-item password-card';
     div.innerHTML = `
-      <div class="flex justify-between items-start">
-        <div class="flex-1 cursor-pointer" onclick="openItemDetail(${item.id})">
-          <div class="flex items-center gap-2">
-            <h3 class="font-bold text-lg">${escapeHtml(item.title)}</h3>
+      <div class="password-card-main cursor-pointer" onclick="openItemDetail(${item.id})">
+        <div class="password-card-title-row">
+            <h3 class="password-card-title">${escapeHtml(item.title)}</h3>
             ${item.login_url ? `<a href="${escapeHtml(item.login_url)}" target="_blank" class="text-blue-600 hover:underline" onclick="event.stopPropagation()">🔐</a>` : ''}
-          </div>
-          <p class="text-gray-600">${escapeHtml(item.username)}</p>
-          ${item.notes ? `<p class="text-gray-500 text-sm mt-1">${escapeHtml(item.notes)}</p>` : ''}
         </div>
-        <div class="flex gap-2">
-          <button onclick="editItem(${item.id})" class="text-blue-600 hover:text-blue-800">✏️</button>
-          <button onclick="deleteItem(${item.id})" class="text-red-600 hover:text-red-800">🗑️</button>
-        </div>
+        <p class="password-card-meta">${escapeHtml(item.username)}</p>
+        ${item.notes ? `<p class="password-card-notes">${escapeHtml(item.notes)}</p>` : ''}
+      </div>
+      <div class="password-card-actions">
+        <button onclick="editItem(${item.id})" class="password-card-icon text-blue-600 hover:text-blue-800" aria-label="编辑">✏️</button>
+        <button onclick="deleteItem(${item.id})" class="password-card-icon text-red-600 hover:text-red-800" aria-label="删除">🗑️</button>
       </div>
     `;
     list.appendChild(div);
