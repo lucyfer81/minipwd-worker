@@ -17,6 +17,7 @@ MiniPWD 是一款基于 Cloudflare Workers 和 D1 数据库构建的轻量级个
 - 💾 **D1 数据库**: 使用 Cloudflare D1 数据库安全存储数据
 - 🔑 **强密码生成**: 内置密码生成器，支持自定义长度和字符类型
 - 🎯 **简洁易用**: 简洁的 Web 界面，支持 CRUD 操作
+- 🗂️ **分类与定位**: 支持个人/工作分类、关键词搜索、最近使用排序
 - 🛡️ **JWT 认证**: 基于 JWT 的安全认证机制
 
 ### 技术栈
@@ -63,6 +64,8 @@ npm run db:setup
 npm run db:setup:prod
 ```
 
+> 已有旧版数据库会在首次访问 `/api/items` 相关接口时自动补齐新字段（`space/folder/tags_json/last_used_at`）。
+
 3. 设置环境密钥：
 
 ```bash
@@ -94,10 +97,12 @@ npm run deploy
 
 #### 密码管理
 
-- `GET /api/items` - 获取所有密码条目
+- `GET /api/items` - 获取密码条目摘要列表（支持 `space/q/sort` 参数，不返回明文密码）
 - `POST /api/items` - 创建新密码条目
+- `GET /api/items/:id` - 获取单个条目详情（返回解密后的密码）
 - `PUT /api/items/:id` - 更新密码条目
 - `DELETE /api/items/:id` - 删除密码条目
+- `POST /api/items/:id/used` - 标记条目为最近使用
 
 #### 工具
 
@@ -150,6 +155,7 @@ MiniPWD is a lightweight personal password manager built on Cloudflare Workers a
 - 💾 **D1 Database**: Secure data storage with Cloudflare D1
 - 🔑 **Password Generator**: Built-in strong password generator with customizable options
 - 🎯 **Simple & Clean**: Minimalist web interface with full CRUD operations
+- 🗂️ **Classification & Retrieval**: Personal/work spaces, keyword search, and "recently used" sorting
 - 🛡️ **JWT Authentication**: Secure JWT-based authentication mechanism
 
 ### Tech Stack
@@ -196,6 +202,8 @@ npm run db:setup
 npm run db:setup:prod
 ```
 
+> Existing databases from older versions will be auto-migrated with new columns (`space/folder/tags_json/last_used_at`) on the first `/api/items` request.
+
 3. Set environment secrets:
 
 ```bash
@@ -227,10 +235,12 @@ npm run deploy
 
 #### Password Management
 
-- `GET /api/items` - Get all password items
+- `GET /api/items` - Get item summaries (supports `space/q/sort`; no plaintext password in list)
 - `POST /api/items` - Create new password item
+- `GET /api/items/:id` - Get item detail (includes decrypted password)
 - `PUT /api/items/:id` - Update password item
 - `DELETE /api/items/:id` - Delete password item
+- `POST /api/items/:id/used` - Mark item as recently used
 
 #### Utilities
 

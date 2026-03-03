@@ -1,4 +1,3 @@
-/* Layout + card system */
 :root {
   --shell-max-width: 2560px;
   --page-gutter: 12px;
@@ -26,13 +25,44 @@ body {
 
 .toolbar {
   display: grid;
-  grid-template-columns: auto auto minmax(240px, 1fr);
+  grid-template-columns: auto auto minmax(220px, 1fr) auto auto;
   align-items: center;
   gap: 12px;
 }
 
 .toolbar-search {
   min-width: 0;
+}
+
+.toolbar-filters {
+  display: inline-flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.space-chip {
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #334155;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  padding: 6px 12px;
+}
+
+.space-chip:hover {
+  background: #eef2ff;
+}
+
+.space-chip.active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+.toolbar-sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .cards-grid {
@@ -79,10 +109,33 @@ body {
   overflow-wrap: anywhere;
 }
 
+.item-space-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 3px 8px;
+}
+
+.item-space-badge.personal {
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.item-space-badge.work {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
 .password-card-meta {
   margin: 0;
   color: #4b5563;
   overflow-wrap: anywhere;
+}
+
+.password-card-tags {
+  margin: 8px 0 0;
+  color: #374151;
+  font-size: 0.84rem;
 }
 
 .password-card-notes {
@@ -115,12 +168,14 @@ body {
   animation: slideIn 0.3s ease-out;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 1023px) {
   .toolbar {
     grid-template-columns: 1fr 1fr;
   }
 
-  .toolbar-search {
+  .toolbar-search,
+  .toolbar-filters,
+  .toolbar-sort {
     grid-column: 1 / -1;
   }
 }
