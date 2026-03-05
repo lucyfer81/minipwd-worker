@@ -6,7 +6,6 @@ CREATE TABLE IF NOT EXISTS items (
   password TEXT NOT NULL,
   login_url TEXT,
   notes TEXT,
-  folder TEXT,
   tags_json TEXT,
   last_used_at DATETIME,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,

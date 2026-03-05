@@ -191,7 +191,6 @@ function matchesQuery(item, query) {
     item.username,
     item.login_url,
     item.notes,
-    item.folder,
     tags,
   ]
     .filter(Boolean)
@@ -233,7 +232,7 @@ function renderItems(items, query) {
       : '暂无密码条目，点击"添加"开始';
 
     list.innerHTML = `
-      <div class="cards-empty text-center text-gray-500 py-10 bg-white rounded-lg border border-dashed border-gray-300">
+      <div class="cards-empty cards-empty-state text-center py-10 rounded-lg border border-dashed">
         ${reason}
       </div>
     `;
@@ -243,7 +242,6 @@ function renderItems(items, query) {
   items.forEach((item) => {
     const normalizedSpace = normalizeSpace(item.space);
     const spaceLabel = normalizedSpace === 'work' ? '工作' : '个人';
-    const folderText = item.folder ? `<p class="password-card-meta">📁 ${escapeHtml(item.folder)}</p>` : '';
     const tagsText = item.tags && item.tags.length > 0 ? `<p class="password-card-tags">🏷️ ${escapeHtml(item.tags.join(', '))}</p>` : '';
 
     const div = document.createElement('div');
@@ -253,16 +251,15 @@ function renderItems(items, query) {
         <div class="password-card-title-row">
           <h3 class="password-card-title">${escapeHtml(item.title)}</h3>
           <span class="item-space-badge ${normalizedSpace}">${spaceLabel}</span>
-          ${item.login_url ? `<a href="${escapeHtml(item.login_url)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline" onclick="event.stopPropagation()">🔐</a>` : ''}
+          ${item.login_url ? `<a href="${escapeHtml(item.login_url)}" target="_blank" rel="noopener noreferrer" class="item-link hover:underline" onclick="event.stopPropagation()">🔐</a>` : ''}
         </div>
         <p class="password-card-meta">${escapeHtml(item.username)}</p>
-        ${folderText}
         ${tagsText}
         ${item.notes ? `<p class="password-card-notes">${escapeHtml(item.notes)}</p>` : ''}
       </div>
       <div class="password-card-actions">
-        <button onclick="editItem(${item.id})" class="password-card-icon text-blue-600 hover:text-blue-800" aria-label="编辑">✏️</button>
-        <button onclick="deleteItem(${item.id})" class="password-card-icon text-red-600 hover:text-red-800" aria-label="删除">🗑️</button>
+        <button onclick="editItem(${item.id})" class="password-card-icon item-action-edit" aria-label="编辑">✏️</button>
+        <button onclick="deleteItem(${item.id})" class="password-card-icon item-action-delete" aria-label="删除">🗑️</button>
       </div>
     `;
     list.appendChild(div);
@@ -277,7 +274,6 @@ async function openItemDetail(id) {
   document.getElementById('detailPassword').textContent = '-';
   document.getElementById('detailUrl').textContent = '-';
   document.getElementById('detailModal').classList.remove('hidden');
-  document.getElementById('detailFolderGroup').classList.add('hidden');
   document.getElementById('detailTagsGroup').classList.add('hidden');
   document.getElementById('detailNotesGroup').classList.add('hidden');
 
@@ -304,11 +300,6 @@ async function openItemDetail(id) {
     document.getElementById('detailUsername').textContent = item.username || '-';
     document.getElementById('detailPassword').textContent = item.password || '-';
     document.getElementById('detailUrl').textContent = item.login_url || '-';
-
-    if (item.folder) {
-      document.getElementById('detailFolder').textContent = item.folder;
-      document.getElementById('detailFolderGroup').classList.remove('hidden');
-    }
 
     if (item.tags && item.tags.length > 0) {
       document.getElementById('detailTags').textContent = item.tags.join(', ');
@@ -424,7 +415,6 @@ function openEditor(item = null) {
     document.getElementById('itemUsername').value = item.username || '';
     document.getElementById('itemPassword').value = item.password || '';
     document.getElementById('itemLoginUrl').value = item.login_url || '';
-    document.getElementById('itemFolder').value = item.folder || '';
     document.getElementById('itemTags').value = item.tags && item.tags.length > 0 ? item.tags.join(', ') : '';
     document.getElementById('itemNotes').value = item.notes || '';
   } else {
@@ -479,7 +469,6 @@ async function handleSaveItem(e) {
     username: document.getElementById('itemUsername').value,
     password: document.getElementById('itemPassword').value,
     login_url: document.getElementById('itemLoginUrl').value,
-    folder: document.getElementById('itemFolder').value,
     tags: parseTagsInput(document.getElementById('itemTags').value),
     notes: document.getElementById('itemNotes').value,
   };
@@ -640,9 +629,7 @@ function logout() {
 
 function showToast(message, type = 'info') {
   const toast = document.createElement('div');
-  toast.className = `toast fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white ${
-    type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-600' : 'bg-blue-600'
-  }`;
+  toast.className = `toast toast--${type} fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white`;
   toast.textContent = message;
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 3000);

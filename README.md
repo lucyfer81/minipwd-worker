@@ -64,7 +64,7 @@ npm run db:setup
 npm run db:setup:prod
 ```
 
-> 已有旧版数据库会在首次访问 `/api/items` 相关接口时自动补齐新字段（`space/folder/tags_json/last_used_at`）。
+> 已有旧版数据库会在首次访问 `/api/items` 相关接口时自动补齐新字段（`space/tags_json/last_used_at`）。
 
 3. 设置环境密钥：
 
@@ -202,7 +202,7 @@ npm run db:setup
 npm run db:setup:prod
 ```
 
-> Existing databases from older versions will be auto-migrated with new columns (`space/folder/tags_json/last_used_at`) on the first `/api/items` request.
+> Existing databases from older versions will be auto-migrated with new columns (`space/tags_json/last_used_at`) on the first `/api/items` request.
 
 3. Set environment secrets:
 

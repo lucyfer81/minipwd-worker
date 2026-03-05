@@ -31,7 +31,6 @@ interface RawItemPayload {
   password?: unknown;
   login_url?: unknown;
   notes?: unknown;
-  folder?: unknown;
   tags?: unknown;
 }
 
@@ -160,7 +159,6 @@ async function parseItemInput(request: Request): Promise<ItemInput> {
     password: parseRequiredString(body.password, 'password', false),
     login_url: parseOptionalString(body.login_url),
     notes: parseOptionalString(body.notes),
-    folder: parseOptionalString(body.folder),
     tags: parseTags(body.tags),
   };
 }

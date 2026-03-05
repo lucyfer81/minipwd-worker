@@ -17,7 +17,6 @@ export interface ItemSummary {
   username: string;
   login_url: string | null;
   notes: string | null;
-  folder: string | null;
   tags: string[];
   created_at: string | null;
   updated_at: string | null;
@@ -35,7 +34,6 @@ export interface ItemInput {
   password: string;
   login_url?: string | null;
   notes?: string | null;
-  folder?: string | null;
   tags?: string[];
 }
 
@@ -53,7 +51,6 @@ interface RawItemRow {
   password?: unknown;
   login_url: unknown;
   notes: unknown;
-  folder: unknown;
   tags_json: unknown;
   created_at: unknown;
   updated_at: unknown;
@@ -135,7 +132,6 @@ function toRawItemRow(row: Record<string, unknown>): RawItemRow {
     password: row.password,
     login_url: row.login_url,
     notes: row.notes,
-    folder: row.folder,
     tags_json: row.tags_json,
     created_at: row.created_at,
     updated_at: row.updated_at,
@@ -151,7 +147,6 @@ function mapToItemSummary(row: RawItemRow): ItemSummary {
     username: normalizeString(row.username),
     login_url: normalizeNullableString(row.login_url),
     notes: normalizeNullableString(row.notes),
-    folder: normalizeNullableString(row.folder),
     tags: parseTags(row.tags_json),
     created_at: normalizeNullableString(row.created_at),
     updated_at: normalizeNullableString(row.updated_at),
@@ -183,7 +178,6 @@ async function ensureItemsSchemaInternal(env: Env): Promise<void> {
       password TEXT NOT NULL,
       login_url TEXT,
       notes TEXT,
-      folder TEXT,
       tags_json TEXT,
       last_used_at DATETIME,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -201,9 +195,6 @@ async function ensureItemsSchemaInternal(env: Env): Promise<void> {
   const alterStatements: string[] = [];
   if (!existingColumns.has('space')) {
     alterStatements.push("ALTER TABLE items ADD COLUMN space TEXT NOT NULL DEFAULT 'personal'");
-  }
-  if (!existingColumns.has('folder')) {
-    alterStatements.push('ALTER TABLE items ADD COLUMN folder TEXT');
   }
   if (!existingColumns.has('tags_json')) {
     alterStatements.push('ALTER TABLE items ADD COLUMN tags_json TEXT');
@@ -252,13 +243,12 @@ export async function listItems(env: Env, options: ListItemsOptions = {}): Promi
         OR lower(username) LIKE ?
         OR lower(coalesce(login_url, '')) LIKE ?
         OR lower(coalesce(notes, '')) LIKE ?
-        OR lower(coalesce(folder, '')) LIKE ?
         OR lower(coalesce(tags_json, '')) LIKE ?
       )
     `);
 
     const like = `%${query}%`;
-    params.push(like, like, like, like, like, like);
+    params.push(like, like, like, like, like);
   }
 
   const sortMap: Record<ItemSort, string> = {
@@ -271,7 +261,7 @@ export async function listItems(env: Env, options: ListItemsOptions = {}): Promi
   const whereSql = where.length > 0 ? `WHERE ${where.join(' AND ')}` : '';
 
   const sql = `
-    SELECT id, space, title, username, login_url, notes, folder, tags_json, created_at, updated_at, last_used_at
+    SELECT id, space, title, username, login_url, notes, tags_json, created_at, updated_at, last_used_at
     FROM items
     ${whereSql}
     ORDER BY ${sortMap[sort]}
@@ -291,8 +281,8 @@ export async function getItemById(env: Env, id: number): Promise<PasswordItem | 
 export async function createItem(env: Env, item: ItemInput): Promise<PasswordItem | null> {
   await ensureItemsSchema(env);
   const result = await env.DB.prepare(
-    `INSERT INTO items (space, title, username, password, login_url, notes, folder, tags_json)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `INSERT INTO items (space, title, username, password, login_url, notes, tags_json)
+     VALUES (?, ?, ?, ?, ?, ?, ?)
      RETURNING *`
   )
     .bind(
@@ -302,7 +292,6 @@ export async function createItem(env: Env, item: ItemInput): Promise<PasswordIte
       item.password,
       normalizeNullableString(item.login_url),
       normalizeNullableString(item.notes),
-      normalizeNullableString(item.folder),
       serializeTags(item.tags)
     )
     .first<Record<string, unknown>>();
@@ -314,7 +303,7 @@ export async function updateItem(env: Env, id: number, item: ItemInput): Promise
   await ensureItemsSchema(env);
   const result = await env.DB.prepare(
     `UPDATE items
-     SET space = ?, title = ?, username = ?, password = ?, login_url = ?, notes = ?, folder = ?, tags_json = ?,
+     SET space = ?, title = ?, username = ?, password = ?, login_url = ?, notes = ?, tags_json = ?,
          updated_at = CURRENT_TIMESTAMP
      WHERE id = ?
      RETURNING *`
@@ -326,7 +315,6 @@ export async function updateItem(env: Env, id: number, item: ItemInput): Promise
       item.password,
       normalizeNullableString(item.login_url),
       normalizeNullableString(item.notes),
-      normalizeNullableString(item.folder),
       serializeTags(item.tags),
       id
     )
@@ -360,7 +348,6 @@ export function toItemSummary(item: PasswordItem): ItemSummary {
     username: item.username,
     login_url: item.login_url,
     notes: item.notes,
-    folder: item.folder,
     tags: item.tags,
     created_at: item.created_at,
     updated_at: item.updated_at,
